@@ -19,11 +19,40 @@ for(i in seq(2,80)){
   }
   
 }
-
+PlotData=function(){
 plot(Data[[2]],seq(2058,1),type='l', xlab='Capacity (Ah)',ylab="RUL (Cycles)",xlim=c(0.86999,1.1))
 for(i in seq(3,80)){
   lines(Data[[i]],append(seq(TotalCycles[i-1],1),rep(0,2058-TotalCycles[i-1])))
 }
+}
+
+
+
+#Making the data 1 big list
+TransformedData=c()
+TransformedData$Capacity=c()
+TransformedData$RUL     =c()
+for (i in seq(2,80)){
+  TransformedData$Capacity=append(TransformedData$Capacity,Data[[i]])
+  TransformedData$RUL=append(TransformedData$RUL,append(seq(TotalCycles[i-1],1),rep(0,2058-TotalCycles[i-1])))
+}
+
+
+my.lm=lm(TransformedData$RUL ~ TransformedData$Capacity)
+abline(my.lm, col='red', lwd=2.5)
+
+my.lm=lm(TransformedData$RUL ~ poly(TransformedData$Capacity, 3, raw = TRUE))
+
+
+#plotting the polynomial of degree made by the regression
+x=seq(from=0.8,to=1.1,by=0.001)
+y=my.lm$coefficients[[1]]+my.lm$coefficients[[2]]*x+my.lm$coefficients[[3]]*x**2 + my.lm$coefficients[[4]]*x**3
+
+PlotData()
+lines(x,y ,col='red', lwd=2.5)
+
+
+
 
 Data2=read.csv("Battery_test.csv")
 x=seq(1,1696)
