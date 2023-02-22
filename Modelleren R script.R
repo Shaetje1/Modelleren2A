@@ -37,23 +37,43 @@ for (i in seq(2,80)){
   TransformedData$RUL=append(TransformedData$RUL,append(seq(TotalCycles[i-1],1),rep(0,2058-TotalCycles[i-1])))
 }
 
+NthRegression=function(n,SM=FALSE){
+  my.lm=lm(TransformedData$RUL ~ poly(TransformedData$Capacity, n, raw = TRUE))
+  sm=summary(my.lm)
 
-my.lm=lm(TransformedData$RUL ~ TransformedData$Capacity)
-abline(my.lm, col='red', lwd=2.5)
-
-my.lm=lm(TransformedData$RUL ~ poly(TransformedData$Capacity, 3, raw = TRUE))
-
-
-#plotting the polynomial of degree made by the regression
-x=seq(from=0.8,to=1.1,by=0.001)
-y=my.lm$coefficients[[1]]+my.lm$coefficients[[2]]*x+my.lm$coefficients[[3]]*x**2 + my.lm$coefficients[[4]]*x**3
-
-PlotData()
-lines(x,y ,col='red', lwd=2.5)
+  PlotData()
+  x=seq(from=0.8,to=1.1,by=0.001)
+  y=rep(my.lm$coefficients[[1]],length(x))
+  for (i in seq(2,n+1)){
+    y=y + my.lm$coefficients[[i]]*x**(i-1)
+  }
 
 
+  lines(x,y ,col='red', lwd=2.5)
+  
+  if (SM==TRUE){
+    print(sm)
+  }
+  return(c(n,mean(sm$residuals**2),median(sm$residuals)))
+  
+  
+}
+
+fileBlaBla=file("output.txt")
+write('',fileBlaBla)
+for (i in seq(1,100)){
+  
+  write(NthRegression(i,FALSE),"output.txt",sep='\n',append=TRUE)
+}
 
 
+
+
+
+
+
+
+#Test data
 Data2=read.csv("Battery_test.csv")
 x=seq(1,1696)
 y=rep(0.88,1696)
