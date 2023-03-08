@@ -221,4 +221,23 @@ for (i in seq(1,100)){
   }
   
 }
+TransformList=c()
+for (i in seq(1,162582)){
+  TransformList[[i]]=1
+  for (j in seq(1,100)){
 
+     TransformList[[i]][j]=Evaluate(TransformedData$Capacity[i],ListOfCoeff[[j]])
+  }
+  TransformList[[i]]=sort(TransformList[[i]])
+
+}
+LowerQuantile=c()
+UpperQuantile=c()
+for (i in seq(1,162582)){
+  LowerQuantile[i]=TransformList[[i]][1]
+  UpperQuantile[i]=TransformList[[i]][100]
+}
+PlotData2()
+lines(TransformedData$Capacity,LowerQuantile,lw=1,col='red',type='p')
+lines(TransformedData$Capacity,UpperQuantile,lw=1,col='blue',type='p')
+PlotForecast(2)
