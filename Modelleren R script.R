@@ -1,4 +1,5 @@
 library("readxl")
+library("boot")
 Data=read.csv("Battery_train.csv")
 x=seq(1,2058)
 y=rep(0.88,2058)
@@ -168,4 +169,56 @@ PlotForecast=function(n){
   lines(x,y ,col='red', lwd=2.5)
 }
 
+
+
+#Bootstrap 
+Transform = function(idx){
+  Indices=sort(idx)
+  Transformed=c()
+  Transformed$RUL=c()
+  Transformed$Capacity=c()
+  for (i in seq(1,79)){
+    Transformed$Capacity=append(Transformed$Capacity,Data[[idx[i]+1]])
+    Transformed$RUL=append(Transformed$RUL,append(seq(TotalCycles[idx[i]],1),rep(0,2058-TotalCycles[idx[i]])))
+  }
+  return (Transformed)
+}
+CoeffIdx= function(idx){
+
+  Transformed=Transform(idx)
+  my.lm=lm(Transformed$RUL ~ poly(Transformed$Capacity, 2, raw = TRUE))
+  return(c(my.lm$coefficients[[1]],my.lm$coefficients[[2]],my.lm$coefficients[[3]]))
+}
+
+Evaluate= function(x,Coeff){
+  return (sum(Coeff[1],x*Coeff[2],x**2*Coeff[3]))
+  
+}
+ListOfIdx=c()
+for (i in seq(1,100)){
+  ListOfIdx[[i]]=sample(seq(1,79),79,replace=TRUE)
+  
+}
+ListOfCoeff=c()
+for (i in seq(1,100)){
+ 
+   ListOfCoeff[[i]]=CoeffIdx(ListOfIdx[[i]])
+}
+
+ListOfRUL=c()
+for (i in seq(1,100)){
+
+
+  ListOfRUL[[i]]=1
+  for(j in seq(1,162582)){
+  
+    
+      
+    
+    
+    ListOfRUL[[i]][j]=Evaluate(TransformedData$Capacity[j],ListOfCoeff[[i]])
+  
+  }
+  
+}
 
