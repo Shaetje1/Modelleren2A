@@ -127,6 +127,19 @@ NthRegPoly=function(n,x){
   
 }
 
+
+my2ndDegree.lm=lm(TransformedData$RUL ~ poly(TransformedData$Capacity, 2, raw = TRUE))
+
+secondRegPoly = function(n,x){
+  my.lm=my2thDegree.lm
+  y=my.lm$coefficients[[1]]
+  for (i in seq(2,n+1)){
+    if (is.na(my.lm$coefficients[[i]])==FALSE){
+      y=y + my.lm$coefficients[[i]]*x**(i-1)
+    }
+  }
+  return(y)
+  }
 #Plots comparing degrees
 x=c()
 y1=c()
@@ -241,3 +254,69 @@ PlotData2()
 lines(TransformedData$Capacity,LowerQuantile,lw=1,col='red',type='p')
 lines(TransformedData$Capacity,UpperQuantile,lw=1,col='blue',type='p')
 PlotForecast(2)
+
+
+
+
+
+
+#Task 4
+CostsxD=function(AmountOfTests){
+Cr = 3
+Cm = 0.5
+Cp = 1
+
+Battery = sample(seq(2,80),1)
+ListOfCosts=c()
+for (j in seq(1,AmountOfTests)){
+  Costs = 0
+  k=1
+while(k<=2000){
+  i=1
+  while (k<=2000){
+
+
+  if (Data[[Battery]][i]<=0.88){
+    Costs = Costs + Cr + Cm + Cp
+
+    Battery = sample(seq(2,80),1)
+    k=k+1
+
+    break
+  
+   
+  
+  }
+  if (i%%200==0){
+    Costs = Costs + Cm
+
+
+    if (secondRegPoly(2,Data[[Battery]][i])<200){
+      Costs = Costs + Cr
+      Battery = sample(seq(2,80),1)
+      k=k+1
+     
+      break
+      
+    }
+
+  }
+  i=i+1
+  k=k+1
+}
+
+}
+  ListOfCosts[j]=Costs
+}
+print("Mean:")
+print(mean(ListOfCosts))
+print("sd:")
+print(sd(ListOfCosts))
+return(ListOfCosts)
+}
+lol=CostsxD(100)
+xd=CostsxD(1000)
+lmao=CostsxD(10000)
+xdd=CostsxD(100000)
+
+
