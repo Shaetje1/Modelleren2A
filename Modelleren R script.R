@@ -34,7 +34,7 @@ for (i in seq(2,80)){
 }
 
 NthRegression=function(n,SM=FALSE){
-  my.lm=lm(TransformedData$RUL ~ poly(TransformedData$Capacity, n, raw = TRUE))
+  my.lm=lm(log(TransformedData$RUL+1) ~ poly(TransformedData$Capacity, n, raw = TRUE))
   sm=summary(my.lm)
 
   PlotData()
@@ -44,7 +44,7 @@ NthRegression=function(n,SM=FALSE){
     if (is.na(my.lm$coefficients[[i]])==FALSE){
     y=y + my.lm$coefficients[[i]]*x**(i-1)
   }}
-
+  y=exp(y)-1
 
   lines(x,y ,col='red', lwd=2.5)
   
@@ -116,19 +116,20 @@ for (i in seq(2,11)){
 }
 
 NthRegPoly=function(n,x){
-  my.lm=lm(TransformedData$RUL ~ poly(TransformedData$Capacity, n, raw = TRUE))
+  my.lm=lm(log(TransformedData$RUL) ~ poly(TransformedData$Capacity, n, raw = TRUE))
   y=my.lm$coefficients[[1]]
   for (i in seq(2,n+1)){
     if (is.na(my.lm$coefficients[[i]])==FALSE){
     y=y + my.lm$coefficients[[i]]*x**(i-1)
     }
   }
+  y=exp(y)-1
   return(y)
   
 }
 
 
-my2ndDegree.lm=lm(TransformedData$RUL ~ poly(TransformedData$Capacity, 2, raw = TRUE))
+my2ndDegree.lm=lm(log(TransformedData$RUL+1) ~ poly(TransformedData$Capacity, 2, raw = TRUE))
 
 secondRegPoly = function(n,x){
   my.lm=my2thDegree.lm
@@ -138,28 +139,29 @@ secondRegPoly = function(n,x){
       y=y + my.lm$coefficients[[i]]*x**(i-1)
     }
   }
+  y=exp(y)-1
   return(y)
   }
 #Plots comparing degrees
-x=c()
-y1=c()
-y2=c()
-for (i in seq(1,100)){
-                 x=append(x,i)
-                 y1=append(y1,NthRegression(i)[2])
-                 y2=append(y2,NthRegression(i)[3])
-}
-plot(x,y1)
-plot(x,y2)
+#x=c()
+#y1=c()
+#y2=c()
+#for (i in seq(1,100)){
+#                 x=append(x,i)
+#                 y1=append(y1,NthRegression(i)[2])
+#                 y2=append(y2,NthRegression(i)[3])
+#}
+#plot(x,y1)
+#plot(x,y2)
 
 MSEforecast=function(n){
-  my.lm=lm(TransformedData$RUL ~ poly(TransformedData$Capacity, n, raw = TRUE))
+  my.lm=lm(log(TransformedData$RUL+1) ~ poly(TransformedData$Capacity, n, raw = TRUE))
   Residuals=c()
   for (i in seq(1,16960)){
   
     Residuals = append(Residuals, TransformedData2$RUL[i]-NthRegPoly(n,TransformedData2$Capacity[i]))
   Residuals=Residuals**2
-  return(mean(Residuals))
+  return(exp(mean(Residuals))-1)
     
   }
 
@@ -167,7 +169,7 @@ MSEforecast=function(n){
 }
 
 PlotForecast=function(n){
-  my.lm=lm(TransformedData$RUL ~ poly(TransformedData$Capacity, n, raw = TRUE))
+  my.lm=lm(log(TransformedData$RUL+1) ~ poly(TransformedData$Capacity, n, raw = TRUE))
   sm=summary(my.lm)
   
 
@@ -177,7 +179,7 @@ PlotForecast=function(n){
     if (is.na(my.lm$coefficients[[i]])==FALSE){
     y=y + my.lm$coefficients[[i]]*x**(i-1)
   }}
-  
+  y=exp(y)-1
   
   lines(x,y ,col='red', lwd=2.5)
 }
@@ -287,11 +289,11 @@ while(k<=2000){
    
   
   }
-  if (i%%200==0){
+  if (i%%400==0){
     Costs = Costs + Cm
 
 
-    if (secondRegPoly(2,Data[[Battery]][i])<200){
+    if (secondRegPoly(2,Data[[Battery]][i])<400){
       Costs = Costs + Cr
       Battery = sample(seq(2,80),1)
       k=k+1
@@ -316,7 +318,6 @@ return(ListOfCosts)
 }
 lol=CostsxD(100)
 xd=CostsxD(1000)
-lmao=CostsxD(10000)
-xdd=CostsxD(100000)
+
 
 

@@ -1,0 +1,40 @@
+section two
+introduce the probem setting and explain some details regarding variables.
+
+section 3
+link the 2 and 3 chapter; state the relation between the data and the polynomial regression. 
+the details are pretty good.
+we can reduce the size of the linear regression explanation by focussing on the polynomial regression. this could help reduce size. 
+use RSS not MRSS.
+the model was tested on training data set. we did the test. do this once more but using the train data set to generate the residuals. Focus on the best fit. Not best predictive fit. 
+try to look at the AIC and BIC. or MSE of different orders.The table can be moved to chapter 4. 
+
+for the assumptions: we have to make solutions. 
+1. apply some transformations to the data. maybe logarithmic.
+log(RUL + 1) ~ capacity
+This is strongly recommended and will make the model better.
+this obervation can already be stated in section two as it is clear from ealier figures.
+this models gives a far better QQ-plot
+2. the rest is good!
+
+
+section 4
+WE need to motivate the interval. We need to consider a prediction interval to 
+include a legend for the interval in the image. 
+the result is not bad. But the red line becomes negative this is not good. 
+using the transformation the line becomes exponential thus positive
+we can then look at 95% interval. 
+time consuming but decent quality. The data has to be transformed in order to work out in a better fashion. 
+Via bootstrap go do this for the data after the transformation. 
+Some asymptotical results can be used.
+using this apply the predict function in R. 
+explain this function in the paper. 
+This also gives a prediction interval. 
+then once more do the analysing
+
+
+one idea: lookinhg at the data: you can categorize the data into batches. Splines maybe can be used. using this you can improve results. Nice to try m
+
+
+
+ 
