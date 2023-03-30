@@ -98,11 +98,23 @@ PlotData=function(){
     lines(Data[[i]],append(seq(TotalCycles[i-1],1),rep(0,2058-TotalCycles[i-1])))
   }
 }
+PlotLogData=function(){
+  plot(Data[[2]],log(seq(2058,1)+1),type='l', xlab='Capacity (Ah)',ylab="RUL (Cycles)",xlim=c(0.86999,1.1))
+  for(i in seq(3,80)){
+    lines(Data[[i]],log(append(seq(TotalCycles[i-1],1),rep(0,2058-TotalCycles[i-1]))+1))
+  }
+}
 
 PlotData2=function(){
   plot(Data2[[11]],seq(1696,1),type='l', xlab='Capacity (Ah)',ylab="RUL (Cycles)",xlim=c(0.86999,1.1))
   for(i in seq(2,10)){
     lines(Data2[[i]],append(seq(TotalCycles2[i-1],1),rep(0,1696-TotalCycles2[i-1])))
+  }
+}
+PlotLogData2=function(){
+  plot(Data2[[11]],log(seq(1696,1)+1),type='l', xlab='Capacity (Ah)',ylab="RUL (Cycles)",xlim=c(0.86999,1.1))
+  for(i in seq(2,10)){
+    lines(Data2[[i]],log(append(seq(TotalCycles2[i-1],1),rep(0,1696-TotalCycles2[i-1]))+1))
   }
 }
 
@@ -210,27 +222,31 @@ Transform = function(idx){
 CoeffIdx= function(idx){
 
   Transformed=Transform(idx)
-  my.lm=lm(log(Transformed$RUL+1) ~ poly(Transformed$Capacity, 2, raw = TRUE))
-  return(c(my.lm$coefficients[[1]],my.lm$coefficients[[2]],my.lm$coefficients[[3]]))
-}
+  my.lm=lm(log(Transformed$RUL+1) ~ poly(Transformed$Capacity, 1, raw = TRUE))
+  return(c(my.lm$coefficients[[1]],my.lm$coefficients[[2]])
+)}
 
 Evaluate= function(x,Coeff){
-  return (exp(sum(Coeff[1],x*Coeff[2],x**2*Coeff[3]))-1)
+  if (is.na(x)==FALSE){
+  return (exp(sum(Coeff[1],x*Coeff[2]))-1)}
+  else{
+    return(0)
+  }
   
 }
 ListOfIdx=c()
-for (i in seq(1,100)){
+for (i in seq(1,200)){
   ListOfIdx[[i]]=sample(seq(1,79),79,replace=TRUE)
   
 }
 ListOfCoeff=c()
-for (i in seq(1,100)){
+for (i in seq(1,200)){
  
    ListOfCoeff[[i]]=CoeffIdx(ListOfIdx[[i]])
 }
 
 ListOfRUL=c()
-for (i in seq(1,100)){
+for (i in seq(1,200)){
 
 
   ListOfRUL[[i]]=1
@@ -248,7 +264,7 @@ for (i in seq(1,100)){
 TransformList=c()
 for (i in seq(1,162582)){
   TransformList[[i]]=1
-  for (j in seq(1,100)){
+  for (j in seq(1,200)){
 
      TransformList[[i]][j]=Evaluate(TransformedData$Capacity[i],ListOfCoeff[[j]])
   }
@@ -258,21 +274,37 @@ for (i in seq(1,162582)){
 LowerQuantile=c()
 UpperQuantile=c()
 for (i in seq(1,162582)){
-  LowerQuantile[i]=TransformList[[i]][1]
-  UpperQuantile[i]=TransformList[[i]][100]
+  LowerQuantile[i]=TransformList[[i]][10]
+  UpperQuantile[i]=TransformList[[i]][191]
 }
 PlotData2()
 lines(TransformedData$Capacity,LowerQuantile,lw=1,col='red',type='p')
 lines(TransformedData$Capacity,UpperQuantile,lw=1,col='blue',type='p')
-PlotForecast(2)
+PlotForecast(1)
 
+
+CoeffLwr=c(confint(my1stDegree.lm)[1],confint(my1stDegree.lm)[2])
+CoeffUpr=c(confint(my1stDegree.lm)[3],confint(my1stDegree.lm)[4])
+LwrR=c()
+UprR=c()
+for (i in seq(1,162582)){
+  LwrR[i]=Evaluate(TransformedData$Capacity[i],CoeffLwr)
+  UprR[i]=Evaluate(TransformedData$Capacity[i],CoeffUpr)
+  if (i%%1000==0){
+    print(i)
+  }
+}
+PlotData2()
+lines(TransformedData$Capacity,LwrR,lw=1,col='red',type='p')
+lines(TransformedData$Capacity,UprR,lw=1,col='blue',type='p')
+PlotForecast(1)
 
 
 
 
 
 #Task 4
-CostsxD=function(AmountOfTests){
+CostsxD=function(AmountOfTests,MaintenanceTime=200){
 Cr = 3
 Cm = 0.5
 Cp = 1
@@ -298,11 +330,11 @@ while(k<=2000){
    
   
   }
-  if (i%%400==0){
+  if (i%%MaintenanceTime==0){
     Costs = Costs + Cm
 
 
-    if (secondRegPoly(2,Data[[Battery]][i])<400){
+    if (Poly(my1stDegree.lm,1,Data[[Battery]][i])<MaintenanceTime){
       Costs = Costs + Cr
       Battery = sample(seq(2,80),1)
       k=k+1
@@ -326,7 +358,14 @@ print(sd(ListOfCosts))
 return(ListOfCosts)
 }
 lol=CostsxD(100)
-xd=CostsxD(1000)
+
+Means=c()
+for (i in seq(50,500)){
+  Means[i]=mean(CostsxD(10,i))
+  
+}
+plot(seq(1,500),Means,type='l')
+
 
 
 
