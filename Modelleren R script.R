@@ -63,7 +63,7 @@ NthRegression=function(n,SM=FALSE){
   
   
 #  write(NthRegression(i,FALSE),"output.txt",sep='\n',append=TRUE)
-}
+#}
 
 
 
@@ -116,6 +116,9 @@ for (i in seq(2,11)){
 }
 
 NthRegPoly=function(n,x){
+  if (is.na(x)){
+    return(0)
+  }
   my.lm=lm(log(TransformedData$RUL) ~ poly(TransformedData$Capacity, n, raw = TRUE))
   y=my.lm$coefficients[[1]]
   for (i in seq(2,n+1)){
@@ -128,11 +131,17 @@ NthRegPoly=function(n,x){
   
 }
 
-
+my1stDegree.lm=lm(log(TransformedData$RUL+1) ~ poly(TransformedData$Capacity, 1, raw = TRUE))
 my2ndDegree.lm=lm(log(TransformedData$RUL+1) ~ poly(TransformedData$Capacity, 2, raw = TRUE))
+my3rdDegree.lm=lm(log(TransformedData$RUL+1) ~ poly(TransformedData$Capacity, 3, raw = TRUE))
+my4thDegree.lm=lm(log(TransformedData$RUL+1) ~ poly(TransformedData$Capacity, 4, raw = TRUE))
+my5thDegree.lm=lm(log(TransformedData$RUL+1) ~ poly(TransformedData$Capacity, 5, raw = TRUE))
 
-secondRegPoly = function(n,x){
-  my.lm=my2thDegree.lm
+Poly = function(my.lm,n,x){
+  if (is.na(x)){
+    return(0)
+  }
+
   y=my.lm$coefficients[[1]]
   for (i in seq(2,n+1)){
     if (is.na(my.lm$coefficients[[i]])==FALSE){
@@ -154,19 +163,19 @@ secondRegPoly = function(n,x){
 #plot(x,y1)
 #plot(x,y2)
 
-MSEforecast=function(n){
-  my.lm=lm(log(TransformedData$RUL+1) ~ poly(TransformedData$Capacity, n, raw = TRUE))
+MSEforecast=function(my.lm,n){
   Residuals=c()
-  for (i in seq(1,16960)){
-  
-    Residuals = append(Residuals, TransformedData2$RUL[i]-NthRegPoly(n,TransformedData2$Capacity[i]))
-  Residuals=Residuals**2
-  return(exp(mean(Residuals))-1)
+  for (i in seq(1,162582)){
     
+    Residuals[i] = TransformedData$RUL[i]-Poly(my.lm,n,TransformedData$Capacity[i])
   }
+  Residuals=Residuals**2
+  return(mean(Residuals))
+    
+}
 
   
-}
+
 
 PlotForecast=function(n){
   my.lm=lm(log(TransformedData$RUL+1) ~ poly(TransformedData$Capacity, n, raw = TRUE))
@@ -201,12 +210,12 @@ Transform = function(idx){
 CoeffIdx= function(idx){
 
   Transformed=Transform(idx)
-  my.lm=lm(Transformed$RUL ~ poly(Transformed$Capacity, 2, raw = TRUE))
+  my.lm=lm(log(Transformed$RUL+1) ~ poly(Transformed$Capacity, 2, raw = TRUE))
   return(c(my.lm$coefficients[[1]],my.lm$coefficients[[2]],my.lm$coefficients[[3]]))
 }
 
 Evaluate= function(x,Coeff){
-  return (sum(Coeff[1],x*Coeff[2],x**2*Coeff[3]))
+  return (exp(sum(Coeff[1],x*Coeff[2],x**2*Coeff[3]))-1)
   
 }
 ListOfIdx=c()
