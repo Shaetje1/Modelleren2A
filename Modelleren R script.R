@@ -278,8 +278,8 @@ for (i in seq(1,162582)){
   UpperQuantile[i]=TransformList[[i]][191]
 }
 PlotData2()
-lines(TransformedData$Capacity,LowerQuantile,lw=1,col='red',type='p')
-lines(TransformedData$Capacity,UpperQuantile,lw=1,col='blue',type='p')
+lines(TransformedData$Capacity,LowerQuantile,col='blue',type='p',cex=0.2)
+lines(TransformedData$Capacity,UpperQuantile,col='blue',type='p',cex=0.2)
 PlotForecast(1)
 
 
@@ -295,8 +295,8 @@ for (i in seq(1,162582)){
   }
 }
 PlotData2()
-lines(TransformedData$Capacity,LwrR,lw=1,col='red',type='p')
-lines(TransformedData$Capacity,UprR,lw=1,col='blue',type='p')
+lines(TransformedData$Capacity,LwrR,col='blue',type='p',cex=0.2)
+lines(TransformedData$Capacity,UprR,col='blue',type='p',cex=0.2)
 PlotForecast(1)
 
 
@@ -369,3 +369,83 @@ plot(seq(1,500),Means,type='l')
 
 
 
+<<<<<<< Updated upstream
+=======
+
+
+
+
+
+# Transformed_Data = c()
+# Transformed_Data$Capacity = c()
+# Transformed_Data$RUL = c()
+# 
+# k = 1
+# for(i in seq(2,80)){
+#   j = 1
+#   Transformed_Data$RUL = append(Transformed_Data$RUL, seq(TotalCycles[i-1],1))
+#   while(is.na(Data[[i]][j]) == FALSE){
+#     print(TRUE)
+#     Transformed_Data$Capacity[k] = Data[[i]][j]
+#     k = k + 1
+#     j = j + 1
+#   }
+# }
+# 
+# k = 1
+# 
+# for(i in seq(2058,1)){
+#   
+#   for(j in seq(2,80)){
+#     
+#     if (is.na(Data[[j]][i]) == FALSE){
+#       Transformed_Data$RUL[k] = TotalCycles[j-1] - i
+#       Transformed_Data$Capacity[k] = Data[[j]][i]
+#       k = k + 1
+#     }
+#   }
+# }
+# 
+# 
+# 
+# mytest.lm = lm(log(Transformed_Data$RUL+1) ~ poly(Transformed_Data$Capacity, 1, raw = TRUE))
+# mytest.lm = lm(Transformed_Data$RUL ~ Transformed_Data$Capacity)
+# 
+# 
+# 
+# 
+# 
+# newx = seq(0.88+0.22/length(Transformed_Data$Capacity),1.1,by=0.22/length(Transformed_Data$Capacity))
+# conf_interval = predict(mytest.lm, newdata = data.frame(newx), interval = 'confidence', level = 0.95)
+# PlotData()
+# lines(newx,conf_interval[,2],col= 'blue')
+# lines(newx,exp(conf_interval[,3]),col = 'blue')
+
+
+
+x = seq(0.01,3,by=0.01)
+y = c()
+
+for (i in seq(0.01,3,by=0.01)){
+  y[i*100] = VariableCost(i,50,20)
+}
+plot(x,y)
+
+
+
+Counter=0
+for (i in seq(1,162582)){
+  
+  x=TransformedData$RUL[i]
+  if (x != 0){
+    if (LowerQuantile[i]>x){
+      Counter=Counter+1
+    }
+    if (UpperQuantile[i]<x){
+      Counter=Counter+1
+    }
+  }
+}
+
+
+>>>>>>> Stashed changes
