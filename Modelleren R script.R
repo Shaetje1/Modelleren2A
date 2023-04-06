@@ -278,10 +278,23 @@ for (i in seq(1,162582)){
   UpperQuantile[i]=TransformList[[i]][191]
 }
 PlotData2()
-lines(TransformedData$Capacity,LowerQuantile,lw=1,col='red',type='p')
-lines(TransformedData$Capacity,UpperQuantile,lw=1,col='blue',type='p')
+lines(TransformedData$Capacity,LowerQuantile,col='blue',type='p',cex=0.2)
+lines(TransformedData$Capacity,UpperQuantile,col='blue',type='p',cex=0.2)
 PlotForecast(1)
 
+Counter=0
+for (i in seq(1,162582)){
+  
+  x=TransformedData$RUL[i]
+  if (x != 0){
+  if (LowerQuantile[i]>x){
+    Counter=Counter+1
+  }
+  if (UpperQuantile[i]<x){
+    Counter=Counter+1
+  }
+  }
+}
 
 CoeffLwr=c(confint(my1stDegree.lm)[1],confint(my1stDegree.lm)[2])
 CoeffUpr=c(confint(my1stDegree.lm)[3],confint(my1stDegree.lm)[4])
@@ -295,8 +308,8 @@ for (i in seq(1,162582)){
   }
 }
 PlotData2()
-lines(TransformedData$Capacity,LwrR,lw=1,col='red',type='p')
-lines(TransformedData$Capacity,UprR,lw=1,col='blue',type='p')
+lines(TransformedData$Capacity,LwrR,col='blue',type='p',cex=0.2)
+lines(TransformedData$Capacity,UprR,col='blue',type='p',cex=0.2)
 PlotForecast(1)
 
 
@@ -360,12 +373,15 @@ return(ListOfCosts)
 lol=CostsxD(100)
 
 Means=c()
+SampleSize = 1
+plot(seq(1,500),seq(10,29.96,1/25),type="n",ylab="Means")
+Means[49]=mean(CostsxD(SampleSize,49))
 for (i in seq(50,500)){
-  Means[i]=mean(CostsxD(10,i))
+  Means[i]=mean(CostsxD(SampleSize,i))
+  lines(c(i-1,i),c(Means[i-1],Means[i]),type="l") #voor de leuk 😄
   
 }
 plot(seq(1,500),Means,type='l')
-
 
 
 
