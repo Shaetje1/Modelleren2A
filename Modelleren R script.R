@@ -388,10 +388,10 @@ CostsxD=function(AmountOfTests,MaintenanceTime=356){
     }
     ListOfCosts[j]=Costs
   }
-  print("Mean:")
-  print(mean(ListOfCosts))
-  print("sd:")
-  print(sd(ListOfCosts))
+  #print("Mean:")
+  #print(mean(ListOfCosts))
+  #print("sd:")
+  #print(sd(ListOfCosts))
   return(ListOfCosts)
 }
 lol=CostsxD(100)
@@ -410,6 +410,8 @@ for (i in seq(50,500)){
 }
 plot(seq(1,500),Means,type='l')
 print(which.min(Means))
+print("s is")
+print(s)
 BestT[s]=which.min(Means)
 }
 
