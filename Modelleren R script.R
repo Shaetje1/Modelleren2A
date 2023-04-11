@@ -397,15 +397,16 @@ CostsxD=function(AmountOfTests,MaintenanceTime=356){
 lol=CostsxD(100)
 
 #DUURT LANG OM TE RUNNEN MET DE FOR LOOP
-for (s in seq(1,20)){
 BestT=c()
+for (s in seq(1,20)){
+
 Means=c()
-SampleSize = 100
+SampleSize = 300
 plot(seq(1,500),seq(10,29.96,1/25),type="n",ylab="Means")
 Means[49]=mean(CostsxD(SampleSize,49))
 for (i in seq(50,500)){
   Means[i]=mean(CostsxD(SampleSize,i))
-  #lines(c(i-1,i),c(Means[i-1],Means[i]),type="l") #voor de leuk :D
+  lines(c(i-1,i),c(Means[i-1],Means[i]),type="l") #voor de leuk :D
   
 }
 plot(seq(1,500),Means,type='l')
@@ -770,4 +771,114 @@ CoeffLine(CoeffUpr4,1.0,1.05)
 CoeffLine(CoeffLwr4,1.0,1.05)
 CoeffLine(CoeffUpr5,1.05,1.1)
 CoeffLine(CoeffLwr5,1.05,1.1)
+
+
+
+
+SplinePoly2 = function(x){
+  if (x >0.85 && x <0.9){
+  return(SplinePoly(x,1))
+    
+  }
+  if (x >=0.9 && x <0.95){
+    return(SplinePoly(x,2))
+    
+  }
+  if (x >=0.95 && x <1){
+    return(SplinePoly(x,3))
+
+  }
+  if (x >=1 && x <1.05){
+    return(SplinePoly(x,4))
+
+    
+  }
+  if (x >=1.05 && x <1.1){
+    return(SplinePoly(x,5))
+
+    
+}}
+VariableSplineCost = function(varTime = 0.8,minRUL = 50 ,AmountOfTests = 1){
+  
+  #Beginwaarden
+  ListOfCosts=c()
+  Cr = 3
+  Cm = 0.5
+  Cp = 1
+  
+  #pak random eerste batterij
+  Battery = sample(seq(2,80),1)
+  
+  #loop door aantal tests
+  for (test_ in seq(1,AmountOfTests)){
+    Costs = 0
+    k = 1
+    
+    
+    while (k < 2000){
+      i = 1
+      j = 1
+      Maintenance = min(500,max(as.integer(varTime*SplinePoly2(Data[[Battery]][i])),minRUL))
+      while (k < 2000){
+        
+        
+        
+        #Battery dead
+        if (Data[[Battery]][i]<=0.88){
+          Costs = Costs + Cr + Cm + Cp
+          
+          Battery = sample(seq(2,80),1)
+          k=k+1
+          
+          break 
+        }
+        
+        
+        #Maintenance
+        if(j == Maintenance){
+          Costs = Costs + Cm
+          
+          if (SplinePoly2(Data[[Battery]][i])<minRUL){
+            Costs = Costs + Cr
+            Battery = sample(seq(2,80),1)
+            k=k+1
+            
+            break
+            
+          }
+          
+          j = 1
+          Maintenance = min(500,max(as.integer(varTime*SplinePoly2(Data[[Battery]][i])),minRUL))
+          
+        }
+        k = k + 1
+        i = i + 1
+        j = j + 1
+        
+      }
+    }
+    
+    ListOfCosts[test_] = Costs
+  }
+  return(mean(ListOfCosts))
+}
+
+
+x = seq(0.01,1,by=0.01)
+y = c()
+
+for (i in seq(0.01,1,by=0.01)){
+  a=VariableSplineCost(i,50,500)
+  y[as.integer(i*100)] =a
+  print(i)
+
+
+}
+
+plot(x,y,xlab='lambda',ylab='Mean costs')
+y[7]=NA
+
+min(y)
+which.min(y)
+
 
